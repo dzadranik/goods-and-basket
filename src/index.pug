@@ -1,0 +1,36 @@
+doctype html
+html(lang="en")
+    head
+        title WhiteCode
+        link(rel='stylesheet' href='css/reset.css')
+        link(rel='stylesheet' href='css/style.css')
+    body
+        .github-link
+            a(href="https://github.com/dzadranik/wc") https://github.com/dzadranik/wc
+        main.wrapper
+            .wrapper__grid
+                .sorting
+                    .sorting__buttons.js-sorting-buttons
+                        span.sorting__title Сортировать
+                        button.sorting__button.js-sorting(id="sorting-name") По названию
+                        button.sorting__button.js-sorting(id="sorting-cost") По цене
+                    label.sorting__avaliable
+                        input.sorting__input(type="checkbox" name="avaliable" id='avaliable')
+                        span.sorting__title Только в наличии
+
+                .good.js-good
+
+                .pagination.js-pagination
+
+            .wrapper__grid
+                .basket
+                    .basket__good.js-basket-good
+
+                    .basket__total ИТОГ
+                        .basket__total-price 
+                            span.js-count-result
+                            span &nbsp;рублей
+
+                    button.basket__button Заказать
+
+        script(type='text/javascript' src="js/script.min.js")

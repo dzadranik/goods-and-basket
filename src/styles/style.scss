@@ -1,0 +1,199 @@
+$white-color: #fff;
+$black-color: #000;
+$grey-color: grey;
+$dark-grey-clor: #bac0c4;
+$blue-color: #06b5ff;
+$light-blue-color: #f3f8fb;
+
+@mixin button {
+	padding: 10px;
+	width: 160px;
+	text-align: center;
+	border-radius: 5px;
+	outline: none;
+	display: block;
+	background: #fff;
+	border: 2px solid $blue-color;
+	color: $blue-color;
+	transition: all 0.6s ease 0s;
+	&:hover {
+		background: $blue-color;
+		color: $white-color;
+	}
+}
+
+@mixin light-button {
+	height: 30px;
+	background: $white-color;
+	color: $black-color;
+	font-weight: bold;
+	text-align: center;
+	box-sizing: border-box;
+	border: none;
+	border-radius: 5px;
+	margin: 0 5px;
+	outline: none;
+	&.active {
+		background: $dark-grey-clor;
+		cursor: inherit;
+	}
+}
+
+body {
+	box-sizing: border-box;
+	background: #cfdde8;
+	font-size: 14px;
+	color: $grey-color;
+	font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana,
+		sans-serif;
+}
+
+.github-link {
+	padding: 10px 20px;
+	a {
+		color: $grey-color;
+		text-decoration: none;
+		&:hover {
+			color: $black-color;
+		}
+	}
+}
+
+.wrapper {
+	display: flex;
+	justify-content: center;
+	&__grid {
+		padding: 20px;
+	}
+}
+
+.sorting {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 20px;
+	&__title {
+		font-weight: bold;
+		color: $black-color;
+		margin: 0 10px;
+	}
+	&__button {
+		@include light-button();
+		padding: 5px 10px;
+	}
+	&__avaliable {
+		display: flex;
+		align-items: center;
+	}
+	&__input {
+		width: 15px;
+		height: 15px;
+	}
+}
+
+.good {
+	width: 600px;
+	margin-bottom: 25px;
+	&__item {
+		background: #fff;
+		border-radius: 10px;
+		margin-bottom: 15px;
+		padding: 20px;
+		display: flex;
+		justify-content: flex-start;
+	}
+	&__image {
+		width: 100px;
+		height: 100px;
+		margin-right: 20px;
+		img {
+			max-width: 100%;
+		}
+	}
+	&__information {
+		flex-grow: 1;
+	}
+	&__title {
+		font-size: 16px;
+		color: $black-color;
+		font-weight: bold;
+	}
+	&__price {
+		color: $blue-color;
+		font-weight: bold;
+		font-size: 20px;
+	}
+	&__button {
+		@include button();
+		margin-bottom: 10px;
+	}
+	&__basket-feedback {
+		color: $black-color;
+		font-weight: bold;
+		font-size: 12px;
+	}
+}
+
+.pagination {
+	display: flex;
+	&__item {
+		@include light-button();
+		width: 30px;
+	}
+	&__dots {
+		display: inline-block;
+		margin: 5px;
+	}
+}
+
+.basket {
+	background: #fff;
+	border-radius: 10px;
+	width: 250px;
+	padding: 20px 10px;
+	&__good-item {
+		background: $light-blue-color;
+		border-radius: 5px;
+		margin-bottom: 10px;
+		display: flex;
+		padding: 10px;
+		align-items: center;
+		color: $black-color;
+		margin-bottom: 15px;
+		position: relative;
+	}
+	&__good-remove {
+		position: absolute;
+		border: none;
+		background: transparent;
+		top: 0;
+		right: 0;
+		color: $grey-color;
+		outline: none;
+	}
+	&__good-image {
+		width: 30px;
+		height: 30px;
+		margin-right: 10px;
+	}
+	&__good-name {
+		font-size: 14px;
+		flex-grow: 1;
+	}
+	&__good-amout {
+		width: 35px;
+	}
+	&__total {
+		color: $black-color;
+		text-align: center;
+		margin-bottom: 20px;
+	}
+	&__total-price {
+		color: $blue-color;
+		font-weight: bold;
+		font-size: 18px;
+	}
+	&__button {
+		@include button();
+		margin: 0 auto;
+	}
+}

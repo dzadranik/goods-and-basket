@@ -1,0 +1,178 @@
+[
+	{
+		"id": 1,
+		"title": "лСтул 1",
+		"image": "images/chair.jpg",
+		"descr": "Супер стул",
+		"price": 55,
+		"avaliable": true
+	},
+	{
+		"id": 2,
+		"title": "аСтул 2",
+		"image": "images/chair.jpg",
+		"descr": "Супер стул 2",
+		"price": 44,
+		"avaliable": true
+	},
+	{
+		"id": 3,
+		"title": "рСтул 3",
+		"image": "images/chair.jpg",
+		"descr": "Супер стул",
+		"price": 33300,
+		"avaliable": true
+	},
+	{
+		"id": 4,
+		"title": "еСтул 4",
+		"image": "images/chair.jpg",
+		"descr": "Супер стул 2",
+		"price": 56,
+		"avaliable": false
+	},
+	{
+		"id": 5,
+		"title": "лСтул 5",
+		"image": "images/chair.jpg",
+		"descr": "Супер стул",
+		"price": 543,
+		"avaliable": false
+	},
+	{
+		"id": 6,
+		"title": "Стул 6",
+		"image": "images/chair.jpg",
+		"descr": "Супер стул 2",
+		"price": 4245,
+		"avaliable": false
+	},
+	{
+		"id": 7,
+		"title": "Стул 7",
+		"image": "images/chair.jpg",
+		"descr": "Супер стул",
+		"price": 300,
+		"avaliable": false
+	},
+	{
+		"id": 8,
+		"title": "тСтул 8",
+		"image": "images/chair.jpg",
+		"descr": "Супер стул 2",
+		"price": 4523,
+		"avaliable": true
+	},
+	{
+		"id": 9,
+		"title": "ыСтул 9",
+		"image": "images/chair.jpg",
+		"descr": "Супер стул",
+		"price": 3054320,
+		"avaliable": true
+	},
+	{
+		"id": 10,
+		"title": "вСтул 10",
+		"image": "images/chair.jpg",
+		"descr": "Супер стул 2",
+		"price": 4,
+		"avaliable": true
+	},
+	{
+		"id": 11,
+		"title": "Стул 11",
+		"image": "images/chair.jpg",
+		"descr": "Супер стул",
+		"price": 55,
+		"avaliable": true
+	},
+	{
+		"id": 12,
+		"title": "аСтул 12",
+		"image": "images/chair.jpg",
+		"descr": "Супер стул 2",
+		"price": 54,
+		"avaliable": true
+	},
+	{
+		"id": 3,
+		"title": "рСтул 3",
+		"image": "images/chair.jpg",
+		"descr": "Супер стул",
+		"price": 33300,
+		"avaliable": true
+	},
+	{
+		"id": 4,
+		"title": "еСтул 4",
+		"image": "images/chair.jpg",
+		"descr": "Супер стул 2",
+		"price": 56,
+		"avaliable": false
+	},
+	{
+		"id": 5,
+		"title": "лСтул 5",
+		"image": "images/chair.jpg",
+		"descr": "Супер стул",
+		"price": 543,
+		"avaliable": false
+	},
+	{
+		"id": 6,
+		"title": "Стул 6",
+		"image": "images/chair.jpg",
+		"descr": "Супер стул 2",
+		"price": 4245,
+		"avaliable": false
+	},
+	{
+		"id": 7,
+		"title": "Стул 7",
+		"image": "images/chair.jpg",
+		"descr": "Супер стул",
+		"price": 300,
+		"avaliable": false
+	},
+	{
+		"id": 8,
+		"title": "тСтул 8",
+		"image": "images/chair.jpg",
+		"descr": "Супер стул 2",
+		"price": 4523,
+		"avaliable": true
+	},
+	{
+		"id": 9,
+		"title": "ыСтул 9",
+		"image": "images/chair.jpg",
+		"descr": "Супер стул",
+		"price": 3054320,
+		"avaliable": true
+	},
+	{
+		"id": 10,
+		"title": "вСтул 10",
+		"image": "images/chair.jpg",
+		"descr": "Супер стул 2",
+		"price": 4,
+		"avaliable": true
+	},
+	{
+		"id": 11,
+		"title": "Стул 11",
+		"image": "images/chair.jpg",
+		"descr": "Супер стул",
+		"price": 55,
+		"avaliable": true
+	},
+	{
+		"id": 12,
+		"title": "аСтул 12",
+		"image": "images/chair.jpg",
+		"descr": "Супер стул 2",
+		"price": 54,
+		"avaliable": true
+	}
+]
