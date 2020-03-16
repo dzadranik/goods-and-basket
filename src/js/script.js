@@ -196,7 +196,7 @@ function goodSetting() {
 
 //пагинация
 function paging() {
-	const itemInPage = 3 // количество элементов на странице
+	const itemInPage = 15 // количество элементов на странице
 	var activePage = 0 // активная страница
 
 	const returnPagingButton = i => {
