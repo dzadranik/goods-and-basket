@@ -88,22 +88,6 @@ function containerClassSetting() {
 	}
 }
 
-// получение данных
-function get(url) {
-	return new Promise(function(succeed, fail) {
-		let request = new XMLHttpRequest()
-		request.open('GET', url, true)
-		request.addEventListener('load', function() {
-			if (request.status < 400) succeed(request.response)
-			else fail(new Error('Request failed: ' + request.statusText))
-		})
-		request.addEventListener('error', function() {
-			fail(new Error('Network error'))
-		})
-		request.send()
-	})
-}
-
 // товары
 function goodSetting() {
 	var goodData = [],
@@ -161,21 +145,14 @@ function goodSetting() {
 
 	return {
 		loadGoodToPage: () => {
-			get('js/goods.json')
-				.then(function(response) {
-					return JSON.parse(response)
-				})
-				.then(function(data) {
-					return sorting(data)
-				})
-				.then(function(data) {
-					return addPaging(data)
-				})
-				.then(function(data) {
+			fetch('js/goods.json')
+				.then(response => response.json())
+				.then(data => sorting(data))
+				.then(data => addPaging(data))
+				.then(data => {
 					addGoodToContainer(data)
 					countGoodInBasket()
 				})
-				.catch()
 		},
 		setAvaliable: value => {
 			avaliable = value
