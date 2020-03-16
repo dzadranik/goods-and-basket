@@ -250,6 +250,11 @@ function paging() {
 function basketSetting() {
 	var goodInBasket = []
 
+	const addCount = data => {
+		data.count = 1
+		return data
+	}
+
 	const returnBasketGoodItem = data => {
 		let { id, image, title, count } = data
 		return `<div class="basket__good-item" basket-good-id="${id}">
@@ -266,8 +271,14 @@ function basketSetting() {
 		addToContainer('.js-basket-good', goodArray)
 	}
 
-	const findGoodAndRemove = (id, i = 0) => {
-		return i < goodInBasket.length || id !== goodInBasket[i].id ? goodInBasket.splice(i, 1) : findGoodAndRemove(i++)
+	const findGoodAndRemove = id => {
+		let index
+		goodInBasket.find((item, i) => {
+			if (id == item.id) {
+				index = i
+			}
+		})
+		goodInBasket.splice(index, 1)
 	}
 
 	const countTotal = () => {
@@ -308,8 +319,7 @@ function basketSetting() {
 					return
 				}
 			}
-			data.count = 1
-			goodInBasket.push(data)
+			goodInBasket = [...goodInBasket, addCount(data)]
 			reloadBasket()
 		},
 		removeGoodFromBasket: data => {
