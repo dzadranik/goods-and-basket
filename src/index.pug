@@ -12,8 +12,8 @@ html(lang="en")
                 .sorting
                     .sorting__buttons.js-sorting-buttons
                         span.sorting__title Сортировать
-                        button.sorting__button.js-sorting(id="sorting-name") По названию
-                        button.sorting__button.js-sorting(id="sorting-cost") По цене
+                        button.sorting__button.active.js-sorting(sorting-setting="sorting-name") По названию
+                        button.sorting__button.js-sorting(sorting-setting="sorting-cost") По цене
                     label.sorting__avaliable
                         input.sorting__input(type="checkbox" name="avaliable" id='avaliable')
                         span.sorting__title Только в наличии

@@ -1,6 +1,7 @@
 var { addGoodToBasket, getLocalSorage, removeGoodFromBasket, countGoodInBasket } = basketSetting(),
 	{ addPaging, setActivePage } = paging(),
-	{ loadGoodToPage, setAvaliable, setSorting, returnGoodData } = goodSetting()
+	{ loadGoodToPage, setAvaliable, setSorting, returnGoodData } = goodSetting(),
+	{ findContainerAndRemoveClass } = containerClassSetting()
 
 document.addEventListener('DOMContentLoaded', function() {
 	const paginationButtonContainer = document.querySelector('.js-pagination'),
@@ -20,9 +21,11 @@ document.addEventListener('DOMContentLoaded', function() {
 	// слушалка сортировок
 	sortingButtonContainer.addEventListener('click', event => {
 		const targetElement = event.target,
-			sortingSetting = targetElement.getAttribute('id')
-		if (targetElement.classList.contains('js-sorting')) {
+			sortingSetting = targetElement.getAttribute('sorting-setting')
+		if (targetElement.classList.contains('js-sorting') && !targetElement.classList.contains('active')) {
+			findContainerAndRemoveClass('.js-sorting', 'active')
 			setSorting(sortingSetting)
+			targetElement.classList.add('active')
 		}
 	})
 
@@ -34,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	// кнопка добавить в корзину
 	goodContainer.addEventListener('click', event => {
 		if (event.target.classList.contains('good__button')) {
-			let goodId = event.target.parentElement.parentElement.getAttribute('data-id')
+			let goodId = event.target.parentElement.parentElement.getAttribute('good-id')
 			let goodData = returnGoodData(goodId)
 			addGoodToBasket(goodData)
 		}
@@ -67,6 +70,24 @@ function addToAnyContainers(containerClass, element) {
 	}
 }
 
+//удалить класс у группы контейнеров
+function containerClassSetting() {
+	var allContainer, classToRemove
+	const removeClassInContainer = (i = 0) => {
+		if (i < allContainer.length) {
+			allContainer[i].classList.remove(classToRemove)
+			return removeClassInContainer(i + 1)
+		}
+	}
+	return {
+		findContainerAndRemoveClass: (container, className) => {
+			allContainer = document.querySelectorAll(container)
+			classToRemove = className
+			removeClassInContainer()
+		}
+	}
+}
+
 // получение данных
 function get(url) {
 	return new Promise(function(succeed, fail) {
@@ -88,13 +109,16 @@ function goodSetting() {
 	var goodData = [],
 		avaliable = false,
 		sortingValue = 'sorting-name'
-	function sortingAvaliable(data) {
+
+	const sortingAvaliable = data => {
 		return data.filter(elem => elem.avaliable)
 	}
-	function sortingByCost(data) {
+
+	const sortingByCost = data => {
 		return data.sort((prev, next) => prev.price - next.price)
 	}
-	function sortingByName(data) {
+
+	const sortingByName = data => {
 		return data.sort((prev, next) => {
 			const x = prev.title.toLowerCase()
 			const y = next.title.toLowerCase()
@@ -102,7 +126,8 @@ function goodSetting() {
 			if (x < y) return 1
 		})
 	}
-	function sorting(data) {
+
+	const sorting = data => {
 		let item = data
 		if (avaliable) item = sortingAvaliable(data)
 
@@ -111,9 +136,9 @@ function goodSetting() {
 		return item
 	}
 
-	function returnGoodItem(data) {
+	const returnGoodItem = data => {
 		let { id, image, title, price, descr } = data
-		return `<div class="good__item" data-id=${id}>
+		return `<div class="good__item" good-id=${id}>
 					<div class="good__image"><img src="${image}"/></div>
 					<div class="good__information">
 						<div class="good__title">${title}</div>
@@ -133,6 +158,7 @@ function goodSetting() {
 		goodItems = goodItems.join('')
 		addToContainer('.js-good', goodItems)
 	}
+
 	return {
 		loadGoodToPage: () => {
 			get('js/goods.json')
@@ -170,20 +196,22 @@ function goodSetting() {
 
 //пагинация
 function paging() {
-	const itemInPage = 15 // количество элементов на странице
+	const itemInPage = 3 // количество элементов на странице
 	var activePage = 0 // активная страница
 
-	function returnPagingButton(i) {
+	const returnPagingButton = i => {
 		return `<button 
 			class="pagination__item js-pagination-button ${i == activePage ? 'active' : ''}" 
 			id="${i + 1}">
 				${i + 1}
 			</button>`
 	}
-	function returnPagingDots() {
+
+	const returnPagingDots = () => {
 		return `<span class='pagination__dots'>...</span>`
 	}
-	function returnAnyPagingButtons(frst, last) {
+
+	const returnAnyPagingButtons = (frst, last) => {
 		let pagingButtons = ''
 		for (let i = frst; i < last; i++) {
 			pagingButtons += returnPagingButton(i)
@@ -191,7 +219,7 @@ function paging() {
 		return pagingButtons
 	}
 
-	function returnPagingButtons(data) {
+	const returnPagingButtons = data => {
 		var item = data, // массив товаров
 			amountItem = item.length, // количество товаров всего
 			amountButton = Math.ceil(amountItem / itemInPage), // количество страниц
@@ -223,7 +251,7 @@ function paging() {
 		return pagingButtons
 	}
 
-	function returnItemInActivePage(data) {
+	const returnItemInActivePage = data => {
 		const firstItem = activePage * itemInPage,
 			lastItem = firstItem + itemInPage
 		return data.slice(firstItem, lastItem)
@@ -245,7 +273,7 @@ function paging() {
 function basketSetting() {
 	var goodInBasket = []
 
-	function returnBasketGoodItem(data) {
+	const returnBasketGoodItem = data => {
 		let { id, image, title, count } = data
 		return `<div class="basket__good-item" basket-good-id="${id}">
 			<button class="basket__good-remove js-remove-good">&#128938;</button>
@@ -255,28 +283,28 @@ function basketSetting() {
 		</div>`
 	}
 
-	function addGoodToContainer() {
+	const addGoodToContainer = () => {
 		let goodArray = goodInBasket.map(element => returnBasketGoodItem(element))
 		goodArray = goodArray.join('')
 		addToContainer('.js-basket-good', goodArray)
 	}
 
-	function findGoodAndRemove(id, i = 0) {
+	const findGoodAndRemove = (id, i = 0) => {
 		return i < goodInBasket.length || id !== goodInBasket[i].id ? goodInBasket.splice(i, 1) : findGoodAndRemove(i++)
 	}
 
-	function countTotal() {
+	const countTotal = () => {
 		let totalCost = goodInBasket.reduce(function(sum, item) {
 			return sum + item.count * item.price
 		}, 0)
 		addToContainer('.js-count-result', totalCost)
 	}
 
-	function saveToLocalStorage() {
+	const saveToLocalStorage = () => {
 		localStorage.goodInBasket = JSON.stringify(goodInBasket)
 	}
 
-	function reloadBasket() {
+	const reloadBasket = () => {
 		saveToLocalStorage()
 		addGoodToContainer()
 		countTotal()
