@@ -138,8 +138,7 @@ function goodSetting() {
 
 	function addGoodToContainer(data) {
 		goodData = data
-		let goodItems = data.map(item => returnGoodItem(item))
-		goodItems = goodItems.join('')
+		let goodItems = data.map(item => returnGoodItem(item)).join('')
 		addToContainer('.js-good', goodItems)
 	}
 
@@ -147,10 +146,8 @@ function goodSetting() {
 		loadGoodToPage: () => {
 			fetch('js/goods.json')
 				.then(response => response.json())
-				.then(data => sorting(data))
-				.then(data => addPaging(data))
 				.then(data => {
-					addGoodToContainer(data)
+					addGoodToContainer(addPaging(sorting(data)))
 					countGoodInBasket()
 				})
 		},
@@ -173,7 +170,7 @@ function goodSetting() {
 
 //пагинация
 function paging() {
-	const itemInPage = 15 // количество элементов на странице
+	const itemInPage = 5 // количество элементов на странице
 	var activePage = 0 // активная страница
 
 	const returnPagingButton = i => {
@@ -280,6 +277,23 @@ function basketSetting() {
 		})
 		goodInBasket.splice(index, 1)
 	}
+	const findInBasket = data => {
+		let index
+		goodInBasket.find((item, i) => {
+			if (data.id == item.id) {
+				index = i
+			}
+		})
+		return { index: index, data: data }
+	}
+	const addToBasket = object => {
+		let { index, data } = object
+		if (index || index == 0) {
+			goodInBasket[index].count++
+		} else {
+			goodInBasket = [...goodInBasket, addCount(data)]
+		}
+	}
 
 	const countTotal = () => {
 		let totalCost = goodInBasket.reduce(function(sum, item) {
@@ -312,18 +326,11 @@ function basketSetting() {
 			addToAnyContainers('.js-good-in-basket', `Товаров в корзине  ${amountItem}`)
 		},
 		addGoodToBasket: data => {
-			for (let i = 0; i < goodInBasket.length; i++) {
-				if (data.id == goodInBasket[i].id) {
-					goodInBasket[i].count++
-					reloadBasket()
-					return
-				}
-			}
-			goodInBasket = [...goodInBasket, addCount(data)]
+			addToBasket(findInBasket(data))
 			reloadBasket()
 		},
-		removeGoodFromBasket: data => {
-			findGoodAndRemove(data)
+		removeGoodFromBasket: id => {
+			findGoodAndRemove(id)
 			reloadBasket()
 		}
 	}
