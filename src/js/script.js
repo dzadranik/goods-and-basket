@@ -144,7 +144,7 @@ function goodSetting() {
 
 	return {
 		loadGoodToPage: () => {
-			fetch('https://dzadranik.github.io/wc/src/js/goods.json')
+			fetch('https://dzadranik.github.io/wc/src/js/goods.json?01')
 				.then(response => response.json())
 				.then(data => {
 					addGoodToContainer(addPaging(sorting(data)))
@@ -256,7 +256,7 @@ function basketSetting() {
 		let { id, image, title, count } = data
 		return `<div class="basket__good-item" basket-good-id="${id}">
 			<button class="basket__good-remove js-remove-good">&#128938;</button>
-			<div class="basket__good-image"><img src="${image}" /></div>
+			<div class="basket__good-image"><img src="${image}"/></div>
 			<div class="basket__good-name">${title}</div>
 			<div class="basket__good-amout">${count}</div>
 		</div>`
