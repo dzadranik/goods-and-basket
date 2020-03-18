@@ -144,7 +144,7 @@ function goodSetting() {
 
 	return {
 		loadGoodToPage: () => {
-			fetch('js/goods.json')
+			fetch('https://dzadranik.github.io/wc/src/js/goods.json')
 				.then(response => response.json())
 				.then(data => {
 					addGoodToContainer(addPaging(sorting(data)))
