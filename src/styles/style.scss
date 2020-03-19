@@ -105,9 +105,7 @@ body {
 		width: 100px;
 		height: 100px;
 		margin-right: 20px;
-		img {
-			max-width: 100px;
-		}
+		flex: none;
 	}
 	&__information {
 		flex-grow: 1;
@@ -174,9 +172,7 @@ body {
 		width: 30px;
 		height: 30px;
 		margin-right: 10px;
-		img {
-			width: 30px;
-		}
+		flex: none;
 	}
 	&__good-name {
 		font-size: 14px;

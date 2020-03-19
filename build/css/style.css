@@ -62,9 +62,8 @@ body {
   .good__image {
     width: 100px;
     height: 100px;
-    margin-right: 20px; }
-    .good__image img {
-      max-width: 100px; }
+    margin-right: 20px;
+    flex: none; }
   .good__information {
     flex-grow: 1; }
   .good__title {
@@ -142,9 +141,8 @@ body {
   .basket__good-image {
     width: 30px;
     height: 30px;
-    margin-right: 10px; }
-    .basket__good-image img {
-      width: 30px; }
+    margin-right: 10px;
+    flex: none; }
   .basket__good-name {
     font-size: 14px;
     flex-grow: 1; }
