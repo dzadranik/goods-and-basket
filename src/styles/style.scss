@@ -139,7 +139,7 @@ body {
 
 .pagination {
 	display: flex;
-	&__item {
+	&__button {
 		@include light-button();
 		width: 30px;
 	}

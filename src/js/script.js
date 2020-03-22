@@ -1,109 +1,95 @@
-var { addGoodToBasket, getLocalSorage, removeGoodFromBasket, countGoodInBasket } = basketSetting(),
-	{ addPaging, setActivePage } = paging(),
-	{ loadGoodToPage, setAvaliable, setSorting, returnGoodData } = goodSetting(),
-	{ findContainerAndRemoveClass } = containerClassSetting()
+var { addGoodToBasket, getLocalSorage, removeGoodFromBasket, getCountGoodsInBasket } = BasketSetting(),
+	{ addPagingGetItemsInPage, setActivePage } = Paging(),
+	{ loadGoods, setAvaliable, setSorting, getGoodInformation } = GoodSetting(),
+	{ findContainersAndRemoveClass } = containerClassSetting()
 
 document.addEventListener('DOMContentLoaded', function() {
-	const paginationButtonContainer = document.querySelector('.js-pagination'),
-		sortingButtonContainer = document.querySelector('.js-sorting-buttons'),
-		avaliableCheckbox = document.getElementById('avaliable'),
-		goodContainer = document.querySelector('.js-good'),
-		basketGoodContainer = document.querySelector('.js-basket-good')
+	const handler = (element, eventName, fn) => {
+		const elementContainer = document.querySelector(element)
+		elementContainer.addEventListener(eventName, event => fn(event))
+	}
 
 	//слушалка кнопок пагинатора
-	paginationButtonContainer.addEventListener('click', event => {
+	handler('.js-pagination', 'click', event => {
 		const targetElement = event.target
 		if (targetElement.classList.contains('js-pagination-button') && !targetElement.classList.contains('active')) {
-			setActivePage(targetElement.getAttribute('id') - 1)
+			setActivePage(targetElement.dataset.pButtonNumber - 1)
 		}
 	})
 
 	// слушалка сортировок
-	sortingButtonContainer.addEventListener('click', event => {
-		const targetElement = event.target,
-			sortingSetting = targetElement.getAttribute('sorting-setting')
+	handler('.js-sorting-buttons', 'click', event => {
+		const targetElement = event.target
 		if (targetElement.classList.contains('js-sorting') && !targetElement.classList.contains('active')) {
-			findContainerAndRemoveClass('.js-sorting', 'active')
+			const sortingSetting = targetElement.dataset.sorting
+			findContainersAndRemoveClass('.js-sorting', 'active')
 			setSorting(sortingSetting)
 			targetElement.classList.add('active')
 		}
 	})
 
 	// слушалка сортировки по наличию
-	avaliableCheckbox.addEventListener('change', event => {
+	handler('.js-avaliable', 'change', event => {
 		setAvaliable(event.target.checked)
 	})
 
 	// кнопка добавить в корзину
-	goodContainer.addEventListener('click', event => {
-		if (event.target.classList.contains('good__button')) {
-			let goodId = event.target.parentElement.parentElement.getAttribute('good-id')
-			let goodData = returnGoodData(goodId)
-			addGoodToBasket(goodData)
+	handler('.js-good', 'click', event => {
+		if (event.target.classList.contains('js-add-to-basket')) {
+			let goodId = event.target.closest('.js-good-item').dataset.goodId
+			addGoodToBasket(getGoodInformation(goodId))
 		}
 	})
 
 	// кнопка удалить из корзины
-	basketGoodContainer.addEventListener('click', event => {
-		const targetElement = event.target
-		if (targetElement.classList.contains('js-remove-good')) {
-			let goodId = targetElement.parentElement.getAttribute('basket-good-id')
-			removeGoodFromBasket(goodId)
+	handler('.js-basket-good', 'click', event => {
+		if (event.target.classList.contains('js-remove-good')) {
+			removeGoodFromBasket(event.target.parentElement.dataset.bGoodId)
 		}
 	})
 })
 
-loadGoodToPage()
+loadGoods()
 getLocalSorage()
 
 //Добавление элементов в контейнер
-function addToContainer(containerClass, element) {
+function addContentToContainer(containerClass, element) {
 	const container = document.querySelector(containerClass)
 	if (container) container.innerHTML = element
-}
-function addToAnyContainers(containerClass, element) {
-	const container = document.querySelectorAll(containerClass)
-	if (container) {
-		for (let i = 0; i < container.length; i++) {
-			container[i].innerHTML = element
-		}
-	}
 }
 
 //удалить класс у группы контейнеров
 function containerClassSetting() {
-	var allContainer, classToRemove
-	const removeClassInContainer = (i = 0) => {
-		if (i < allContainer.length) {
-			allContainer[i].classList.remove(classToRemove)
-			return removeClassInContainer(i + 1)
+	const removeClassInContainer = (allContainers, className, i = 0) => {
+		if (i < allContainers.length) {
+			allContainers[i].classList.remove(className)
+			return removeClassInContainer(allContainers, className, i + 1)
 		}
 	}
 	return {
-		findContainerAndRemoveClass: (container, className) => {
-			allContainer = document.querySelectorAll(container)
-			classToRemove = className
-			removeClassInContainer()
+		findContainersAndRemoveClass: (containerClass, className) => {
+			let allContainers = document.querySelectorAll(containerClass)
+			removeClassInContainer(allContainers, className)
 		}
 	}
 }
 
 // товары
-function goodSetting() {
-	var goodData = [],
+function GoodSetting() {
+	var goodsInPage = [],
 		avaliable = false,
-		sortingValue = 'sorting-name'
+		sortingValue = 'name'
 
-	const sortingAvaliable = data => {
-		return data.filter(elem => elem.avaliable)
+	const sortingAvaliable = goods => {
+		return goods.filter(elem => elem.avaliable)
 	}
 
-	const sortingByCost = data => {
-		return data.sort((prev, next) => prev.price - next.price)
+	const sortingByCost = goods => {
+		return goods.sort((prev, next) => prev.price - next.price)
 	}
 
-	const sortingByName = data => {
-		return data.sort((prev, next) => {
+	const sortingByName = goods => {
+		return goods.sort((prev, next) => {
 			const x = prev.title.toLowerCase()
 			const y = next.title.toLowerCase()
 			if (x < y) return -1
@@ -111,18 +97,17 @@ function goodSetting() {
 		})
 	}
 
-	const sorting = data => {
-		let item = data
-		if (avaliable) item = sortingAvaliable(data)
+	const sorting = goods => {
+		if (avaliable) goods = sortingAvaliable(goods)
 
-		if (sortingValue == 'sorting-cost') item = sortingByCost(item)
-		else if (sortingValue == 'sorting-name') item = sortingByName(item)
-		return item
+		if (sortingValue == 'cost') goods = sortingByCost(goods)
+		else if (sortingValue == 'name') goods = sortingByName(goods)
+		return goods
 	}
 
-	const returnGoodItem = data => {
-		let { id, image, title, price, descr } = data
-		return `<div class="good__item" good-id=${id}>
+	const getGoodContent = good => {
+		let { id, image, title, price, descr } = good
+		return `<div class="good__item js-good-item" data-good-id=${id}>
 					<div class="good__image"><img src="${image}"/></div>
 					<div class="good__information">
 						<div class="good__title">${title}</div>
@@ -130,131 +115,123 @@ function goodSetting() {
 						<div class="good__description">${descr}</div>
 					</div>
 					<div class="good__transaction">
-						<button class="good__button">Добавить в корзину</button>
+						<button class="good__button js-add-to-basket">Добавить в корзину</button>
 						<div class="good__basket-feedback js-good-in-basket"></div>
 					</div>
 				</div>`
 	}
 
-	function addGoodToContainer(data) {
-		goodData = data
-		let goodItems = data.map(item => returnGoodItem(item)).join('')
-		addToContainer('.js-good', goodItems)
+	function addGoodsToContainer(goods) {
+		goodsInPage = goods
+		const goodsContent = goods.map(good => getGoodContent(good)).join('')
+		addContentToContainer('.js-good', goodsContent)
 	}
 
 	return {
-		loadGoodToPage: () => {
+		loadGoods: () => {
 			fetch('https://dzadranik.github.io/wc/src/json/goods.json')
 				.then(response => response.json())
-				.then(data => {
-					addGoodToContainer(addPaging(sorting(data)))
-					countGoodInBasket()
+				.then(goods => {
+					addGoodsToContainer(addPagingGetItemsInPage(sorting(goods)))
 				})
 		},
 		setAvaliable: value => {
 			avaliable = value
 			setActivePage(0)
-			loadGoodToPage()
+			loadGoods()
 		},
 		setSorting: value => {
 			if (sortingValue != value) {
 				sortingValue = value
-				loadGoodToPage()
+				loadGoods()
 			}
 		},
-		returnGoodData: id => {
-			return goodData.find(item => item.id == id)
+		getGoodInformation: id => {
+			return goodsInPage.find(item => item.id == id)
 		}
 	}
 }
 
 //пагинация
-function paging() {
-	const itemInPage = 5 // количество элементов на странице
-	var activePage = 0 // активная страница
+function Paging() {
+	const amountPageItems = 5 // количество элементов на странице
+	var numberActivePage = 0 // активная страница
 
-	const returnPagingButton = i => {
+	const getPButtonContent = number => {
 		return `<button 
-			class="pagination__item js-pagination-button ${i == activePage ? 'active' : ''}" 
-			id="${i + 1}">
-				${i + 1}
+			class="pagination__button js-pagination-button ${number === numberActivePage ? 'active' : ''}" 
+			data-p-button-number="${number + 1}">
+				${number + 1}
 			</button>`
 	}
 
-	const returnPagingDots = () => {
+	const getPDotsContent = () => {
 		return `<span class='pagination__dots'>...</span>`
 	}
 
-	const returnAnyPagingButtons = (frst, last) => {
-		let pagingButtons = ''
-		for (let i = frst; i < last; i++) {
-			pagingButtons += returnPagingButton(i)
+	const getPButtonsNumberContent = (first, last, pButtonsContent = '') => {
+		if (first < last) {
+			pButtonsContent += getPButtonContent(first)
+			return getPButtonsNumberContent(first + 1, last, pButtonsContent)
 		}
-		return pagingButtons
+		return pButtonsContent
 	}
 
-	const returnPagingButtons = data => {
-		var item = data, // массив товаров
-			amountItem = item.length, // количество товаров всего
-			amountButton = Math.ceil(amountItem / itemInPage), // количество страниц
-			pagingButtons = '' // разметка кнопок пагинации
+	const getPButtonsContent = items => {
+		let amountButtons = Math.ceil(items.length / amountPageItems), // количество страниц
+			pButtonsContent = '' // разметка кнопок пагинации
 
-		if (amountButton > 6) {
-			if (activePage < 2 || activePage > amountButton - 3) {
-				pagingButtons += returnAnyPagingButtons(0, 3)
-				pagingButtons += returnPagingDots()
-				pagingButtons += returnAnyPagingButtons(amountButton - 3, amountButton)
-			} else if (activePage == 2) {
-				pagingButtons += returnAnyPagingButtons(0, 4)
-				pagingButtons += returnPagingDots()
-				pagingButtons += returnAnyPagingButtons(amountButton - 1, amountButton)
-			} else if (activePage == amountButton - 3) {
-				pagingButtons += returnAnyPagingButtons(0, 1)
-				pagingButtons += returnPagingDots()
-				pagingButtons += returnAnyPagingButtons(amountButton - 4, amountButton)
-			} else if (activePage > 2 && activePage < amountButton - 3) {
-				pagingButtons += returnAnyPagingButtons(0, 1)
-				pagingButtons += returnPagingDots()
-				pagingButtons += returnAnyPagingButtons(activePage - 1, activePage + 2)
-				pagingButtons += returnPagingDots()
-				pagingButtons += returnAnyPagingButtons(amountButton - 1, amountButton)
+		if (amountButtons > 6) {
+			if (numberActivePage < 2 || numberActivePage > amountButtons - 3) {
+				pButtonsContent += getPButtonsNumberContent(0, 3)
+				pButtonsContent += getPDotsContent()
+				pButtonsContent += getPButtonsNumberContent(amountButtons - 3, amountButtons)
+			} else if (numberActivePage == 2) {
+				pButtonsContent += getPButtonsNumberContent(0, 4)
+				pButtonsContent += getPDotsContent()
+				pButtonsContent += getPButtonsNumberContent(amountButtons - 1, amountButtons)
+			} else if (numberActivePage == amountButtons - 3) {
+				pButtonsContent += getPButtonsNumberContent(0, 1)
+				pButtonsContent += getPDotsContent()
+				pButtonsContent += getPButtonsNumberContent(amountButtons - 4, amountButtons)
+			} else if (numberActivePage > 2 && numberActivePage < amountButtons - 3) {
+				pButtonsContent += getAnyPButtons(0, 1)
+				pButtonsContent += getPButtonsNumberContent()
+				pButtonsContent += getAnyPButtons(numberActivePage - 1, numberActivePage + 2)
+				pButtonsContent += getPButtonsNumberContent()
+				pButtonsContent += getAnyPButtons(amountButtons - 1, amountButtons)
 			}
 		} else {
-			pagingButtons += returnAnyPagingButtons(0, amountButton)
+			pButtonsContent += getPButtonsNumberContent(0, amountButtons)
 		}
-		return pagingButtons
+		return pButtonsContent
 	}
 
-	const returnItemInActivePage = data => {
-		const firstItem = activePage * itemInPage,
-			lastItem = firstItem + itemInPage
-		return data.slice(firstItem, lastItem)
+	const getItemsInActivePage = items => {
+		const firstItem = numberActivePage * amountPageItems,
+			lastItem = firstItem + amountPageItems
+		return items.slice(firstItem, lastItem)
 	}
 
 	return {
-		setActivePage: i => {
-			activePage = i
-			loadGoodToPage()
+		setActivePage: number => {
+			numberActivePage = number
+			loadGoods()
 		},
-		addPaging: data => {
-			addToContainer('.js-pagination', returnPagingButtons(data))
-			return returnItemInActivePage(data)
+		addPagingGetItemsInPage: items => {
+			addContentToContainer('.js-pagination', getPButtonsContent(items))
+			return getItemsInActivePage(items)
 		}
 	}
 }
 
 //корзина
-function basketSetting() {
-	var goodInBasket = []
+function BasketSetting() {
+	var goodsInBasket = []
 
-	const addCount = data => {
-		data.count = 1
-		return data
-	}
-
-	const returnBasketGoodItem = data => {
-		let { id, image, title, count } = data
-		return `<div class="basket__good-item" basket-good-id="${id}">
+	const getGoodContent = good => {
+		let { id, image, title, count } = good
+		return `<div class="basket__good-item" data-b-good-id="${id}">
 			<button class="basket__good-remove js-remove-good">&#128938;</button>
 			<div class="basket__good-image"><img src="${image}"/></div>
 			<div class="basket__good-name">${title}</div>
@@ -263,70 +240,63 @@ function basketSetting() {
 	}
 
 	const addGoodToContainer = () => {
-		let goodArray = goodInBasket.map(element => returnBasketGoodItem(element))
-		goodArray = goodArray.join('')
-		addToContainer('.js-basket-good', goodArray)
+		let goodsContent = goodsInBasket.map(good => getGoodContent(good)).join('')
+		addContentToContainer('.js-basket-good', goodsContent)
 	}
 
 	const findGoodAndRemove = id => {
-		let index
-		goodInBasket.find((item, i) => {
-			if (id == item.id) {
-				index = i
-			}
-		})
-		goodInBasket.splice(index, 1)
+		let index = goodsInBasket.findIndex(item => item.id === +id)
+		goodsInBasket.splice(index, 1)
 	}
-	const findInBasket = data => {
-		let index
-		goodInBasket.find((item, i) => {
-			if (data.id == item.id) {
-				index = i
-			}
-		})
-		return { index: index, data: data }
-	}
-	const addToBasket = object => {
-		let { index, data } = object
-		if (index || index == 0) {
-			goodInBasket[index].count++
-		} else {
-			goodInBasket = [...goodInBasket, addCount(data)]
+	const findGoodAndAdd = good => {
+		if (
+			!goodsInBasket.find(item => {
+				if (good.id === item.id) {
+					item.count++
+					return true
+				}
+			})
+		) {
+			good.count = 1
+			goodsInBasket = [...goodsInBasket, good]
 		}
 	}
 
-	const countTotal = () => {
-		let totalCost = goodInBasket.reduce(function(sum, item) {
+	const countTotalCost = () => {
+		let totalCost = goodsInBasket.reduce(function(sum, item) {
 			return sum + item.count * item.price
 		}, 0)
-		addToContainer('.js-count-result', totalCost)
+		addContentToContainer('.js-count-result', totalCost)
 	}
 
 	const saveToLocalStorage = () => {
-		localStorage.goodInBasket = JSON.stringify(goodInBasket)
+		localStorage.goodsInBasket = JSON.stringify(goodsInBasket)
+	}
+
+	const countGoodsInBasket = () => {
+		return goodsInBasket.reduce(function(sum, item) {
+			return sum + item.count
+		}, 0)
 	}
 
 	const reloadBasket = () => {
 		saveToLocalStorage()
 		addGoodToContainer()
-		countTotal()
-		countGoodInBasket()
+		countTotalCost()
 	}
 
 	return {
 		getLocalSorage: () => {
-			if (localStorage.getItem('goodInBasket') != null)
-				goodInBasket = JSON.parse(localStorage.getItem('goodInBasket'))
-			reloadBasket()
+			if (localStorage.getItem('goodsInBasket') != null)
+				goodsInBasket = JSON.parse(localStorage.getItem('goodsInBasket'))
+			addGoodToContainer()
+			countTotalCost()
 		},
-		countGoodInBasket: () => {
-			let amountItem = goodInBasket.reduce(function(sum, item) {
-				return sum + item.count
-			}, 0)
-			addToAnyContainers('.js-good-in-basket', `Товаров в корзине  ${amountItem}`)
+		getCountGoodsInBasket: () => {
+			addContentToContainer('.js-good-in-basket', countGoodsInBasket())
 		},
-		addGoodToBasket: data => {
-			addToBasket(findInBasket(data))
+		addGoodToBasket: good => {
+			findGoodAndAdd(good)
 			reloadBasket()
 		},
 		removeGoodFromBasket: id => {
