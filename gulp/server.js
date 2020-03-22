@@ -8,21 +8,12 @@ var browsersync = require('browser-sync').create()
 module.exports = function server(cb) {
 	browsersync.init({
 		server: 'build',
-		open: true
+		open: false
 	})
 
-	gulp.watch(
-		'src/styles/*.scss',
-		gulp.series(styles, cb =>
-			gulp
-				.src('build/css')
-				.pipe(browsersync.stream())
-				.on('end', cb)
-		)
-	)
+	gulp.watch('src/styles/*.scss', gulp.series(styles))
 	gulp.watch('src/js/*.js', gulp.series(script))
-	gulp.watch('build/js/*.js').on('change', browsersync.reload)
 	gulp.watch('src/*.pug', gulp.series(pug2html))
-	gulp.watch('build/*.html').on('change', browsersync.reload)
+	gulp.watch('build/**/**.*').on('change', browsersync.reload)
 	return cb()
 }
