@@ -1,1 +1,1 @@
-GitHub Pages https://dzadranik.github.io/wc/build/index.html
+GitHub Pages https://dzadranik.github.io/goods-and-basket/build/index.html
