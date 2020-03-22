@@ -1,11 +1,12 @@
 @import 'reset';
+@import url('https://fonts.googleapis.com/css?family=Open+Sans&display=swap');
 
-$white-color: #fff;
-$black-color: #000;
-$grey-color: grey;
-$dark-grey-clor: #bac0c4;
-$blue-color: #06b5ff;
-$light-blue-color: #f3f8fb;
+$color-white: #fff;
+$color-black: #000;
+$color-font: grey;
+$color-blue: #088dc4;
+$color-background-blue: #eaf9ff;
+$color-background-active-button: #cacaca;
 
 @mixin button {
 	padding: 10px;
@@ -14,20 +15,20 @@ $light-blue-color: #f3f8fb;
 	border-radius: 5px;
 	outline: none;
 	display: block;
-	background: #fff;
-	border: 2px solid $blue-color;
-	color: $blue-color;
+	background: $color-white;
+	border: 2px solid $color-blue;
+	color: $color-blue;
 	transition: all 0.6s ease 0s;
 	&:hover {
-		background: $blue-color;
-		color: $white-color;
+		background: $color-blue;
+		color: $color-white;
 	}
 }
 
 @mixin light-button {
 	height: 30px;
-	background: $white-color;
-	color: $black-color;
+	background: $color-white;
+	color: $color-black;
 	font-weight: bold;
 	text-align: center;
 	box-sizing: border-box;
@@ -36,27 +37,26 @@ $light-blue-color: #f3f8fb;
 	margin: 0 5px;
 	outline: none;
 	&.active {
-		background: $dark-grey-clor;
+		background: $color-background-active-button;
 		cursor: inherit;
 	}
 }
 
 body {
 	box-sizing: border-box;
-	background: #cfdde8;
+	background: #f6f6f6;
 	font-size: 14px;
-	color: $grey-color;
-	font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana,
-		sans-serif;
+	color: $color-font;
+	font-family: 'Open Sans', sans-serif;
 }
 
 .github-link {
 	padding: 10px 20px;
 	a {
-		color: $grey-color;
+		color: $color-font;
 		text-decoration: none;
 		&:hover {
-			color: $black-color;
+			color: $color-black;
 		}
 	}
 }
@@ -75,7 +75,7 @@ body {
 	margin-bottom: 20px;
 	&__title {
 		font-weight: bold;
-		color: $black-color;
+		color: $color-black;
 		margin: 0 10px;
 	}
 	&__button {
@@ -96,7 +96,7 @@ body {
 	width: 600px;
 	margin-bottom: 25px;
 	&__item {
-		background: #fff;
+		background: $color-white;
 		border-radius: 10px;
 		margin-bottom: 15px;
 		padding: 20px;
@@ -108,17 +108,21 @@ body {
 		height: 100px;
 		margin-right: 20px;
 		flex: none;
+		img {
+			border-radius: 50px;
+		}
 	}
 	&__information {
 		flex-grow: 1;
+		margin-right: 20px;
 	}
 	&__title {
 		font-size: 16px;
-		color: $black-color;
+		color: $color-black;
 		font-weight: bold;
 	}
 	&__price {
-		color: $blue-color;
+		color: $color-blue;
 		font-weight: bold;
 		font-size: 20px;
 	}
@@ -127,7 +131,7 @@ body {
 		margin-bottom: 10px;
 	}
 	&__basket-feedback {
-		color: $black-color;
+		color: $color-black;
 		font-weight: bold;
 		font-size: 12px;
 	}
@@ -146,18 +150,18 @@ body {
 }
 
 .basket {
-	background: #fff;
+	background: $color-white;
 	border-radius: 10px;
 	width: 250px;
 	padding: 20px 10px;
 	&__good-item {
-		background: $light-blue-color;
+		background: $color-background-blue;
 		border-radius: 5px;
 		margin-bottom: 10px;
 		display: flex;
 		padding: 10px;
 		align-items: center;
-		color: $black-color;
+		color: $color-black;
 		margin-bottom: 15px;
 		position: relative;
 	}
@@ -167,7 +171,7 @@ body {
 		background: transparent;
 		top: 0;
 		right: 0;
-		color: $grey-color;
+		color: $color-font;
 		outline: none;
 	}
 	&__good-image {
@@ -175,6 +179,9 @@ body {
 		height: 30px;
 		margin-right: 10px;
 		flex: none;
+		img {
+			border-radius: 50px;
+		}
 	}
 	&__good-name {
 		font-size: 14px;
@@ -184,12 +191,12 @@ body {
 		width: 35px;
 	}
 	&__total {
-		color: $black-color;
+		color: $color-black;
 		text-align: center;
 		margin-bottom: 20px;
 	}
 	&__total-price {
-		color: $blue-color;
+		color: $color-blue;
 		font-weight: bold;
 		font-size: 18px;
 	}
