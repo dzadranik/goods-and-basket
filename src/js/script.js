@@ -129,7 +129,7 @@ function GoodSetting() {
 
 	return {
 		loadGoods: () => {
-			fetch('https://dzadranik.github.io/wc/src/json/goods.json')
+			fetch('https://dzadranik.github.io/goods-and-basket/src/json/goods.json')
 				.then(response => response.json())
 				.then(goods => {
 					addGoodsToContainer(addPagingGetItemsInPage(sorting(goods)))
