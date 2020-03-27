@@ -251,8 +251,8 @@ function BasketSetting() {
 	};
 
 	const findGoodAndRemove = id => {
-		let index = goodsInBasket.findIndex(item => item.id === +id);
-		goodsInBasket.splice(index, 1);
+		let goodIndex = goodsInBasket.findIndex(item => item.id === +id);
+		goodsInBasket.splice(goodIndex, 1);
 	};
 
 	const findGoodAndAdd = good => {
@@ -266,9 +266,7 @@ function BasketSetting() {
 	};
 
 	const countTotalCost = () => {
-		let totalCost = goodsInBasket.reduce(function(sum, item) {
-			return sum + item.count * item.price;
-		}, 0);
+		let totalCost = goodsInBasket.reduce((sum, item) => sum + item.count * item.price, 0);
 		addContentToContainer('.js-count-result', totalCost);
 	};
 
@@ -277,9 +275,7 @@ function BasketSetting() {
 	};
 
 	const countGoodsInBasket = () => {
-		return goodsInBasket.reduce(function(sum, item) {
-			return sum + item.count;
-		}, 0);
+		return goodsInBasket.reduce((sum, item) => sum + item.count, 0);
 	};
 
 	const reloadBasket = () => {
