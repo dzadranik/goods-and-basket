@@ -1,7 +1,6 @@
 const basket = new BasketSetting(),
 	goods = new GoodSetting(),
-	paging = new Paging(),
-	container = new ContainerClassSetting();
+	goodsPaging = new Paging();
 
 goods.loadGoods();
 basket.getLocalSorage();
@@ -16,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	handler('.js-pagination', 'click', event => {
 		const targetElement = event.target;
 		if (targetElement.classList.contains('js-pagination-button') && !targetElement.classList.contains('active')) {
-			paging.setActivePage(targetElement.dataset.pButtonNumber - 1);
+			goodsPaging.setActivePage(targetElement.dataset.pButtonNumber - 1);
 		}
 	});
 
@@ -25,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		const targetElement = event.target;
 		if (targetElement.classList.contains('js-sorting') && !targetElement.classList.contains('active')) {
 			const sortingSetting = targetElement.dataset.sorting;
-			container.findContainersAndRemoveClass('.js-sorting', 'active');
+			findContainersAndRemoveClass('.js-sorting', 'active');
 			goods.setSorting(sortingSetting);
 			targetElement.classList.add('active');
 		}
@@ -59,17 +58,15 @@ function addContentToContainer(containerClass, element) {
 }
 
 //удалить класс у группы контейнеров
-function ContainerClassSetting() {
+function findContainersAndRemoveClass(containerClass, className) {
 	const removeClassInContainer = (allContainers, className, i = 0) => {
 		if (i < allContainers.length) {
 			allContainers[i].classList.remove(className);
 			return removeClassInContainer(allContainers, className, i + 1);
 		}
 	};
-	this.findContainersAndRemoveClass = function(containerClass, className) {
-		let allContainers = document.querySelectorAll(containerClass);
-		removeClassInContainer(allContainers, className);
-	};
+	let allContainers = document.querySelectorAll(containerClass);
+	removeClassInContainer(allContainers, className);
 }
 
 // товары
@@ -137,13 +134,13 @@ function GoodSetting() {
 		fetch('https://dzadranik.github.io/goods-and-basket/src/json/goods.json')
 			.then(response => response.json())
 			.then(goods => {
-				addGoodsToContainer(paging.addPagingGetItemsInPage(sorting(goods)));
+				addGoodsToContainer(goodsPaging.addPagingGetItemsInPage(sorting(goods)));
 			});
 	};
 
 	this.setAvaliable = function(value) {
 		avaliable = value;
-		paging.setActivePage(0);
+		goodsPaging.setActivePage(0);
 		this.loadGoods();
 	};
 
@@ -202,11 +199,11 @@ function Paging() {
 				pButtonsContent += getPDotsContent();
 				pButtonsContent += getPButtonsNumberContent(amountButtons - 4, amountButtons);
 			} else if (numberActivePage > 2 && numberActivePage < amountButtons - 3) {
-				pButtonsContent += getAnyPButtons(0, 1);
-				pButtonsContent += getPButtonsNumberContent();
-				pButtonsContent += getAnyPButtons(numberActivePage - 1, numberActivePage + 2);
-				pButtonsContent += getPButtonsNumberContent();
-				pButtonsContent += getAnyPButtons(amountButtons - 1, amountButtons);
+				pButtonsContent += getPButtonsNumberContent(0, 1);
+				pButtonsContent += getPDotsContent();
+				pButtonsContent += getPButtonsNumberContent(numberActivePage - 1, numberActivePage + 2);
+				pButtonsContent += getPDotsContent();
+				pButtonsContent += getPButtonsNumberContent(amountButtons - 1, amountButtons);
 			}
 		} else {
 			pButtonsContent += getPButtonsNumberContent(0, amountButtons);
