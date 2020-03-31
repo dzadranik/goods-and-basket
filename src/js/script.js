@@ -1,74 +1,3 @@
-const basket = new BasketSetting(),
-	goods = new GoodSetting(),
-	goodsPaging = new Paging();
-
-goods.loadGoods();
-basket.getLocalSorage();
-
-document.addEventListener('DOMContentLoaded', function() {
-	const handler = (element, eventName, fn) => {
-		const elementContainer = document.querySelector(element);
-		elementContainer.addEventListener(eventName, event => fn(event));
-	};
-
-	//слушалка кнопок пагинатора
-	handler('.js-pagination', 'click', event => {
-		const targetElement = event.target;
-		if (targetElement.classList.contains('js-pagination-button') && !targetElement.classList.contains('active')) {
-			goodsPaging.setActivePage(targetElement.dataset.pButtonNumber - 1);
-		}
-	});
-
-	// слушалка сортировок
-	handler('.js-sorting-buttons', 'click', event => {
-		const targetElement = event.target;
-		if (targetElement.classList.contains('js-sorting') && !targetElement.classList.contains('active')) {
-			const sortingSetting = targetElement.dataset.sorting;
-			findContainersAndRemoveClass('.js-sorting', 'active');
-			goods.setSorting(sortingSetting);
-			targetElement.classList.add('active');
-		}
-	});
-
-	// слушалка сортировки по наличию
-	handler('.js-avaliable', 'change', event => {
-		goods.setAvaliable(event.target.checked);
-	});
-
-	// кнопка добавить в корзину
-	handler('.js-good', 'click', event => {
-		if (event.target.classList.contains('js-add-to-basket')) {
-			let goodId = event.target.closest('.js-good-item').dataset.goodId;
-			basket.addGoodToBasket(goods.getGoodInformation(goodId));
-		}
-	});
-
-	// кнопка удалить из корзины
-	handler('.js-basket-good', 'click', event => {
-		if (event.target.classList.contains('js-remove-good')) {
-			basket.removeGoodFromBasket(event.target.parentElement.dataset.bGoodId);
-		}
-	});
-});
-
-//Добавление элементов в контейнер
-function addContentToContainer(containerClass, element) {
-	const container = document.querySelector(containerClass);
-	if (container) container.innerHTML = element;
-}
-
-//удалить класс у группы контейнеров
-function findContainersAndRemoveClass(containerClass, className) {
-	const removeClassInContainer = (allContainers, className, i = 0) => {
-		if (i < allContainers.length) {
-			allContainers[i].classList.remove(className);
-			return removeClassInContainer(allContainers, className, i + 1);
-		}
-	};
-	let allContainers = document.querySelectorAll(containerClass);
-	removeClassInContainer(allContainers, className);
-}
-
 // товары
 function GoodSetting() {
 	let goodsInPage = [],
@@ -157,75 +86,78 @@ function GoodSetting() {
 }
 
 //пагинация
-function Paging() {
-	const amountPageItems = 5; // количество элементов на странице
-	let numberActivePage = 0; // активная страница
+class Paging {
+	constructor(amountPageItems, container) {
+		this._container = container;
+		this._amountPageItems = amountPageItems;
+		this._activePage = 0;
+	}
 
-	const getPButtonContent = number => {
+	_getPButtonContent(number) {
 		return `<button 
-			class="pagination__button js-pagination-button ${number === numberActivePage ? 'active' : ''}" 
-			data-p-button-number="${number + 1}">
-				${number + 1}
-			</button>`;
-	};
+					class="pagination__button js-pagination-button 
+					${number === this._activePage ? 'active' : ''}" 
+					data-p-button-number="${number + 1}">
+						${number + 1}
+				</button>`;
+	}
 
-	const getPDotsContent = () => {
+	_getPDotsContent() {
 		return `<span class='pagination__dots'>...</span>`;
-	};
+	}
 
-	const getPButtonsNumberContent = (first, last, pButtonsContent = '') => {
+	_getPButtonsNumberContent(first, last, pButtonsContent = '') {
 		if (first < last) {
-			pButtonsContent += getPButtonContent(first);
-			return getPButtonsNumberContent(first + 1, last, pButtonsContent);
+			pButtonsContent += this._getPButtonContent(first);
+			return this._getPButtonsNumberContent(first + 1, last, pButtonsContent);
 		}
 		return pButtonsContent;
-	};
+	}
 
-	const getPButtonsContent = items => {
-		let amountButtons = Math.ceil(items.length / amountPageItems), // количество страниц
+	_getPButtonsContent(items) {
+		let amountButtons = Math.ceil(items.length / this._amountPageItems), // количество страниц
 			pButtonsContent = ''; // разметка кнопок пагинации
 
 		if (amountButtons > 6) {
-			if (numberActivePage < 2 || numberActivePage > amountButtons - 3) {
-				pButtonsContent += getPButtonsNumberContent(0, 3);
-				pButtonsContent += getPDotsContent();
-				pButtonsContent += getPButtonsNumberContent(amountButtons - 3, amountButtons);
-			} else if (numberActivePage == 2) {
-				pButtonsContent += getPButtonsNumberContent(0, 4);
-				pButtonsContent += getPDotsContent();
-				pButtonsContent += getPButtonsNumberContent(amountButtons - 1, amountButtons);
-			} else if (numberActivePage == amountButtons - 3) {
-				pButtonsContent += getPButtonsNumberContent(0, 1);
-				pButtonsContent += getPDotsContent();
-				pButtonsContent += getPButtonsNumberContent(amountButtons - 4, amountButtons);
-			} else if (numberActivePage > 2 && numberActivePage < amountButtons - 3) {
-				pButtonsContent += getPButtonsNumberContent(0, 1);
-				pButtonsContent += getPDotsContent();
-				pButtonsContent += getPButtonsNumberContent(numberActivePage - 1, numberActivePage + 2);
-				pButtonsContent += getPDotsContent();
-				pButtonsContent += getPButtonsNumberContent(amountButtons - 1, amountButtons);
+			if (this._activePage < 2 || this._activePage > amountButtons - 3) {
+				pButtonsContent += this._getPButtonsNumberContent(0, 3);
+				pButtonsContent += this._getPDotsContent();
+				pButtonsContent += this._getPButtonsNumberContent(amountButtons - 3, amountButtons);
+			} else if (this._activePage == 2) {
+				pButtonsContent += this._getPButtonsNumberContent(0, 4);
+				pButtonsContent += this._getPDotsContent();
+				pButtonsContent += this._getPButtonsNumberContent(amountButtons - 1, amountButtons);
+			} else if (this._activePage == amountButtons - 3) {
+				pButtonsContent += this._getPButtonsNumberContent(0, 1);
+				pButtonsContent += this._getPDotsContent();
+				pButtonsContent += this._getPButtonsNumberContent(amountButtons - 4, amountButtons);
+			} else if (this._activePage > 2 && this._activePage < amountButtons - 3) {
+				pButtonsContent += this._getPButtonsNumberContent(0, 1);
+				pButtonsContent += this._getPDotsContent();
+				pButtonsContent += this._getPButtonsNumberContent(this._activePage - 1, this._activePage + 2);
+				pButtonsContent += this._getPDotsContent();
+				pButtonsContent += this._getPButtonsNumberContent(amountButtons - 1, amountButtons);
 			}
 		} else {
-			pButtonsContent += getPButtonsNumberContent(0, amountButtons);
+			pButtonsContent += this._getPButtonsNumberContent(0, amountButtons);
 		}
 		return pButtonsContent;
-	};
+	}
 
-	const getItemsInActivePage = items => {
-		const firstItem = numberActivePage * amountPageItems,
-			lastItem = firstItem + amountPageItems;
+	_getItemsInActivePage(items) {
+		const firstItem = this._activePage * this._amountPageItems,
+			lastItem = firstItem + this._amountPageItems;
 		return items.slice(firstItem, lastItem);
-	};
+	}
 
-	this.setActivePage = function(number) {
-		numberActivePage = number;
-		goods.loadGoods();
-	};
+	setActivePage(number) {
+		this._activePage = number;
+	}
 
-	this.addPagingGetItemsInPage = function(items) {
-		addContentToContainer('.js-pagination', getPButtonsContent(items));
-		return getItemsInActivePage(items);
-	};
+	addPagingGetItemsInPage(items) {
+		addContentToContainer(this._container, this._getPButtonsContent(items));
+		return this._getItemsInActivePage(items);
+	}
 }
 
 //корзина
@@ -302,3 +234,75 @@ function BasketSetting() {
 		reloadBasket();
 	};
 }
+
+//Добавление элементов в контейнер
+function addContentToContainer(containerClass, element) {
+	const container = document.querySelector(containerClass);
+	if (container) container.innerHTML = element;
+}
+
+//удалить класс у группы контейнеров
+function findContainersAndRemoveClass(containerClass, className) {
+	const removeClassInContainer = (allContainers, className, i = 0) => {
+		if (i < allContainers.length) {
+			allContainers[i].classList.remove(className);
+			return removeClassInContainer(allContainers, className, i + 1);
+		}
+	};
+	let allContainers = document.querySelectorAll(containerClass);
+	removeClassInContainer(allContainers, className);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+	const handler = (element, eventName, fn) => {
+		const elementContainer = document.querySelector(element);
+		elementContainer.addEventListener(eventName, event => fn(event));
+	};
+
+	//слушалка кнопок пагинатора
+	handler('.js-pagination', 'click', event => {
+		const targetElement = event.target;
+		if (targetElement.classList.contains('js-pagination-button') && !targetElement.classList.contains('active')) {
+			goodsPaging.setActivePage(targetElement.dataset.pButtonNumber - 1);
+			goods.loadGoods();
+		}
+	});
+
+	// слушалка сортировок
+	handler('.js-sorting-buttons', 'click', event => {
+		const targetElement = event.target;
+		if (targetElement.classList.contains('js-sorting') && !targetElement.classList.contains('active')) {
+			const sortingSetting = targetElement.dataset.sorting;
+			findContainersAndRemoveClass('.js-sorting', 'active');
+			goods.setSorting(sortingSetting);
+			targetElement.classList.add('active');
+		}
+	});
+
+	// слушалка сортировки по наличию
+	handler('.js-avaliable', 'change', event => {
+		goods.setAvaliable(event.target.checked);
+	});
+
+	// кнопка добавить в корзину
+	handler('.js-good', 'click', event => {
+		if (event.target.classList.contains('js-add-to-basket')) {
+			let goodId = event.target.closest('.js-good-item').dataset.goodId;
+			basket.addGoodToBasket(goods.getGoodInformation(goodId));
+		}
+	});
+
+	// кнопка удалить из корзины
+	handler('.js-basket-good', 'click', event => {
+		if (event.target.classList.contains('js-remove-good')) {
+			basket.removeGoodFromBasket(event.target.parentElement.dataset.bGoodId);
+		}
+	});
+});
+
+const basket = new BasketSetting(),
+	goods = new GoodSetting(),
+	goodsPaging = new Paging(5, '.js-pagination');
+
+goods.loadGoods();
+basket.getLocalSorage();
