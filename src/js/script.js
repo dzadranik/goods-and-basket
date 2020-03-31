@@ -58,7 +58,7 @@ class Goods {
 	_addGoodsToContainer(goods) {
 		this._goodsInPage = goods;
 		const goodsContent = goods.map(good => this._getGoodContent(good)).join('');
-		addContentToContainer('.js-good', goodsContent);
+		addContentToContainer(goodsContent, '.js-good');
 	}
 
 	loadGoods() {
@@ -71,7 +71,6 @@ class Goods {
 
 	setAvaliable(value) {
 		this._avaliable = value;
-		goodsPaging.setActivePage(0);
 		this.loadGoods();
 	}
 
@@ -90,11 +89,12 @@ class Goods {
 //корзина
 class Basket {
 	constructor() {
-		this._goodsInBasket = [];
+		this._goodsInBasket =
+			localStorage.getItem('goodsInBasket') != null ? JSON.parse(localStorage.getItem('goodsInBasket')) : [];
 	}
 
 	_getGoodContent(good) {
-		let { id, image, title, count } = good;
+		const { id, image, title, count } = good;
 		return `<div class="basket__good-item" data-b-good-id="${id}">
 			<button class="basket__good-remove js-remove-good">&#128938;</button>
 			<div class="basket__good-image"><img src="${image}"/></div>
@@ -103,18 +103,18 @@ class Basket {
 		</div>`;
 	}
 
-	_addGoodToContainer() {
-		let goodsContent = this._goodsInBasket.map(good => this._getGoodContent(good)).join('');
-		addContentToContainer('.js-basket-good', goodsContent);
+	_addGoodsToContainer() {
+		const goodsContent = this._goodsInBasket.map(good => this._getGoodContent(good)).join('');
+		addContentToContainer(goodsContent, '.js-basket-good');
 	}
 
 	_findGoodAndRemove(id) {
-		let goodIndex = this._goodsInBasket.findIndex(item => item.id === +id);
-		this._goodsInBasket.splice(goodIndex, 1);
+		const goodIndex = this._goodsInBasket.findIndex(item => item.id === +id);
+		return this._goodsInBasket.splice(goodIndex, 1);
 	}
 
 	_findGoodAndAdd(good) {
-		let goodInBasket = this._goodsInBasket.find(item => item.id === good.id);
+		const goodInBasket = this._goodsInBasket.find(item => item.id === good.id);
 		if (goodInBasket) {
 			goodInBasket.count++;
 		} else {
@@ -123,9 +123,9 @@ class Basket {
 		}
 	}
 
-	_countTotalCost() {
-		let totalCost = this._goodsInBasket.reduce((sum, item) => sum + item.count * item.price, 0);
-		addContentToContainer('.js-count-result', totalCost);
+	_addTotalCost() {
+		const totalCost = this._goodsInBasket.reduce((sum, item) => sum + item.count * item.price, 0);
+		addContentToContainer(totalCost, '.js-count-result');
 	}
 
 	_saveToLocalStorage() {
@@ -136,31 +136,25 @@ class Basket {
 		return this._goodsInBasket.reduce((sum, item) => sum + item.count, 0);
 	}
 
-	_reloadBasket() {
-		this._saveToLocalStorage();
-		this._addGoodToContainer();
-		this._countTotalCost();
-	}
-
-	getLocalSorage() {
-		if (localStorage.getItem('goodsInBasket') != null)
-			this._goodsInBasket = JSON.parse(localStorage.getItem('goodsInBasket'));
-		this._addGoodToContainer();
-		this._countTotalCost();
-	}
-
-	getCountGoodsInBasket() {
-		addContentToContainer('.js-good-in-basket', this._countGoodsInBasket());
+	addCountGoodsInBasket() {
+		addContentToContainer(this._countGoodsInBasket(), '.js-good-in-basket');
 	}
 
 	addGoodToBasket(good) {
 		this._findGoodAndAdd(good);
-		this._reloadBasket();
+		this._saveToLocalStorage();
+		this.reloadBasket();
 	}
 
 	removeGoodFromBasket(id) {
 		this._findGoodAndRemove(id);
-		this._reloadBasket();
+		this._saveToLocalStorage();
+		this.reloadBasket();
+	}
+
+	reloadBasket() {
+		this._addGoodsToContainer();
+		this._addTotalCost();
 	}
 }
 
@@ -234,27 +228,27 @@ class Paging {
 	}
 
 	addPagingGetItemsInPage(items) {
-		addContentToContainer(this._container, this._getPButtonsContent(items));
+		addContentToContainer(this._getPButtonsContent(items), this._container);
 		return this._getItemsInActivePage(items);
 	}
 }
 
 //Добавление элементов в контейнер
-function addContentToContainer(containerClass, element) {
+function addContentToContainer(content, containerClass) {
 	const container = document.querySelector(containerClass);
-	if (container) container.innerHTML = element;
+	if (container) container.innerHTML = content;
 }
 
 //удалить класс у группы контейнеров
 function findContainersAndRemoveClass(containerClass, className) {
-	const removeClassInContainer = (allContainers, className, i = 0) => {
-		if (i < allContainers.length) {
-			allContainers[i].classList.remove(className);
-			return removeClassInContainer(allContainers, className, i + 1);
-		}
-	};
-	let allContainers = document.querySelectorAll(containerClass);
-	removeClassInContainer(allContainers, className);
+	const allContainers = document.querySelectorAll(containerClass),
+		removeClassInContainer = (i = 0) => {
+			if (i < allContainers.length) {
+				allContainers[i].classList.remove(className);
+				return removeClassInContainer(i + 1);
+			}
+		};
+	removeClassInContainer();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -285,6 +279,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	// слушалка сортировки по наличию
 	handler('.js-avaliable', 'change', event => {
+		goodsPaging.setActivePage(0);
 		goods.setAvaliable(event.target.checked);
 	});
 
@@ -309,4 +304,4 @@ const basket = new Basket(),
 	goodsPaging = new Paging(5, '.js-pagination');
 
 goods.loadGoods();
-basket.getLocalSorage();
+basket.reloadBasket();
