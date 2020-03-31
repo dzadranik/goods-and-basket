@@ -1,88 +1,167 @@
 // товары
-function GoodSetting() {
-	let goodsInPage = [],
-		avaliable = false,
-		sortingValue = 'name';
+class Goods {
+	constructor() {
+		this._goodsInPage = [];
+		this._avaliable = false;
+		this._sortingValue = 'name';
+	}
 
-	const sortingAvaliable = goods => {
+	_sortingAvaliable(goods) {
 		return goods.filter(elem => elem.avaliable);
-	};
+	}
 
-	const sortingByCost = goods => {
+	_sortingByCost(goods) {
 		return goods.sort((prev, next) => prev.price - next.price);
-	};
+	}
 
-	const sortingByName = goods => {
+	_sortingByName(goods) {
 		return goods.sort((prev, next) => {
 			const x = prev.title.toLowerCase();
 			const y = next.title.toLowerCase();
 			if (x < y) return -1;
 			if (x < y) return 1;
 		});
-	};
+	}
 
-	const sorting = goods => {
-		if (avaliable) goods = sortingAvaliable(goods);
+	_sorting(goods) {
+		if (this._avaliable) goods = this._sortingAvaliable(goods);
 
-		if (sortingValue == 'cost') goods = sortingByCost(goods);
-		else if (sortingValue == 'name') goods = sortingByName(goods);
+		if (this._sortingValue == 'cost') goods = this._sortingByCost(goods);
+		else if (this._sortingValue == 'name') goods = this._sortingByName(goods);
 		return goods;
-	};
+	}
 
-	const truncate = function(descr, maxLength) {
+	_truncate(descr, maxLength) {
 		if (descr.length > maxLength) {
 			let gap = descr.lastIndexOf(' ', maxLength);
 			return `${descr.slice(0, gap)} ...`;
 		}
 		return descr;
-	};
+	}
 
-	const getGoodContent = good => {
+	_getGoodContent(good) {
 		let { id, image, title, price, descr } = good;
 		return `<div class="good__item js-good-item" data-good-id=${id}>
 					<div class="good__image"><img src="${image}"/></div>
 					<div class="good__information">
 						<div class="good__title">${title}</div>
 						<div class="good__price">${price} руб</div>
-						<div class="good__description">${truncate(descr, 65)}</div>
+						<div class="good__description">${this._truncate(descr, 65)}</div>
 					</div>
 					<div class="good__transaction">
 						<button class="good__button js-add-to-basket">Добавить в корзину</button>
 						<div class="good__basket-feedback js-good-in-basket"></div>
 					</div>
 				</div>`;
-	};
+	}
 
-	const addGoodsToContainer = goods => {
-		goodsInPage = goods;
-		const goodsContent = goods.map(good => getGoodContent(good)).join('');
+	_addGoodsToContainer(goods) {
+		this._goodsInPage = goods;
+		const goodsContent = goods.map(good => this._getGoodContent(good)).join('');
 		addContentToContainer('.js-good', goodsContent);
-	};
+	}
 
-	this.loadGoods = function() {
+	loadGoods() {
 		fetch('https://dzadranik.github.io/goods-and-basket/src/json/goods.json')
 			.then(response => response.json())
 			.then(goods => {
-				addGoodsToContainer(goodsPaging.addPagingGetItemsInPage(sorting(goods)));
+				this._addGoodsToContainer(goodsPaging.addPagingGetItemsInPage(this._sorting(goods)));
 			});
-	};
+	}
 
-	this.setAvaliable = function(value) {
-		avaliable = value;
+	setAvaliable(value) {
+		this._avaliable = value;
 		goodsPaging.setActivePage(0);
 		this.loadGoods();
-	};
+	}
 
-	this.setSorting = function(value) {
-		if (sortingValue != value) {
-			sortingValue = value;
+	setSorting(value) {
+		if (this._sortingValue != value) {
+			this._sortingValue = value;
 			this.loadGoods();
 		}
-	};
+	}
 
-	this.getGoodInformation = function(id) {
-		return goodsInPage.find(item => item.id == id);
-	};
+	getGoodInformation(id) {
+		return this._goodsInPage.find(item => item.id == id);
+	}
+}
+
+//корзина
+class Basket {
+	constructor() {
+		this._goodsInBasket = [];
+	}
+
+	_getGoodContent(good) {
+		let { id, image, title, count } = good;
+		return `<div class="basket__good-item" data-b-good-id="${id}">
+			<button class="basket__good-remove js-remove-good">&#128938;</button>
+			<div class="basket__good-image"><img src="${image}"/></div>
+			<div class="basket__good-name">${title}</div>
+			<div class="basket__good-amout">${count}</div>
+		</div>`;
+	}
+
+	_addGoodToContainer() {
+		let goodsContent = this._goodsInBasket.map(good => this._getGoodContent(good)).join('');
+		addContentToContainer('.js-basket-good', goodsContent);
+	}
+
+	_findGoodAndRemove(id) {
+		let goodIndex = this._goodsInBasket.findIndex(item => item.id === +id);
+		this._goodsInBasket.splice(goodIndex, 1);
+	}
+
+	_findGoodAndAdd(good) {
+		let goodInBasket = this._goodsInBasket.find(item => item.id === good.id);
+		if (goodInBasket) {
+			goodInBasket.count++;
+		} else {
+			good.count = 1;
+			this._goodsInBasket = [...this._goodsInBasket, good];
+		}
+	}
+
+	_countTotalCost() {
+		let totalCost = this._goodsInBasket.reduce((sum, item) => sum + item.count * item.price, 0);
+		addContentToContainer('.js-count-result', totalCost);
+	}
+
+	_saveToLocalStorage() {
+		localStorage.goodsInBasket = JSON.stringify(this._goodsInBasket);
+	}
+
+	_countGoodsInBasket() {
+		return this._goodsInBasket.reduce((sum, item) => sum + item.count, 0);
+	}
+
+	_reloadBasket() {
+		this._saveToLocalStorage();
+		this._addGoodToContainer();
+		this._countTotalCost();
+	}
+
+	getLocalSorage() {
+		if (localStorage.getItem('goodsInBasket') != null)
+			this._goodsInBasket = JSON.parse(localStorage.getItem('goodsInBasket'));
+		this._addGoodToContainer();
+		this._countTotalCost();
+	}
+
+	getCountGoodsInBasket() {
+		addContentToContainer('.js-good-in-basket', this._countGoodsInBasket());
+	}
+
+	addGoodToBasket(good) {
+		this._findGoodAndAdd(good);
+		this._reloadBasket();
+	}
+
+	removeGoodFromBasket(id) {
+		this._findGoodAndRemove(id);
+		this._reloadBasket();
+	}
 }
 
 //пагинация
@@ -160,81 +239,6 @@ class Paging {
 	}
 }
 
-//корзина
-function BasketSetting() {
-	let goodsInBasket = [];
-
-	const getGoodContent = good => {
-		let { id, image, title, count } = good;
-		return `<div class="basket__good-item" data-b-good-id="${id}">
-			<button class="basket__good-remove js-remove-good">&#128938;</button>
-			<div class="basket__good-image"><img src="${image}"/></div>
-			<div class="basket__good-name">${title}</div>
-			<div class="basket__good-amout">${count}</div>
-		</div>`;
-	};
-
-	const addGoodToContainer = () => {
-		let goodsContent = goodsInBasket.map(good => getGoodContent(good)).join('');
-		addContentToContainer('.js-basket-good', goodsContent);
-	};
-
-	const findGoodAndRemove = id => {
-		let goodIndex = goodsInBasket.findIndex(item => item.id === +id);
-		goodsInBasket.splice(goodIndex, 1);
-	};
-
-	const findGoodAndAdd = good => {
-		let goodInBasket = goodsInBasket.find(item => item.id === good.id);
-		if (goodInBasket) {
-			goodInBasket.count++;
-		} else {
-			good.count = 1;
-			goodsInBasket = [...goodsInBasket, good];
-		}
-	};
-
-	const countTotalCost = () => {
-		let totalCost = goodsInBasket.reduce((sum, item) => sum + item.count * item.price, 0);
-		addContentToContainer('.js-count-result', totalCost);
-	};
-
-	const saveToLocalStorage = () => {
-		localStorage.goodsInBasket = JSON.stringify(goodsInBasket);
-	};
-
-	const countGoodsInBasket = () => {
-		return goodsInBasket.reduce((sum, item) => sum + item.count, 0);
-	};
-
-	const reloadBasket = () => {
-		saveToLocalStorage();
-		addGoodToContainer();
-		countTotalCost();
-	};
-
-	this.getLocalSorage = function() {
-		if (localStorage.getItem('goodsInBasket') != null)
-			goodsInBasket = JSON.parse(localStorage.getItem('goodsInBasket'));
-		addGoodToContainer();
-		countTotalCost();
-	};
-
-	this.getCountGoodsInBasket = () => {
-		addContentToContainer('.js-good-in-basket', countGoodsInBasket());
-	};
-
-	this.addGoodToBasket = good => {
-		findGoodAndAdd(good);
-		reloadBasket();
-	};
-
-	this.removeGoodFromBasket = id => {
-		findGoodAndRemove(id);
-		reloadBasket();
-	};
-}
-
 //Добавление элементов в контейнер
 function addContentToContainer(containerClass, element) {
 	const container = document.querySelector(containerClass);
@@ -300,8 +304,8 @@ document.addEventListener('DOMContentLoaded', function() {
 	});
 });
 
-const basket = new BasketSetting(),
-	goods = new GoodSetting(),
+const basket = new Basket(),
+	goods = new Goods(),
 	goodsPaging = new Paging(5, '.js-pagination');
 
 goods.loadGoods();
