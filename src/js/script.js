@@ -1,6 +1,7 @@
 // товары
 class Goods {
-	constructor() {
+	constructor(linkToJson) {
+		this._linkToJson = linkToJson;
 		this._goodsInPage = [];
 		this._avaliable = false;
 		this._sortingValue = 'name';
@@ -22,7 +23,6 @@ class Goods {
 			if (x < y) return 1;
 		});
 	}
-
 	_sorting(goods) {
 		if (this._avaliable) goods = this._sortingAvaliable(goods);
 
@@ -30,7 +30,6 @@ class Goods {
 		else if (this._sortingValue == 'name') goods = this._sortingByName(goods);
 		return goods;
 	}
-
 	_truncate(descr, maxLength) {
 		if (descr.length > maxLength) {
 			let gap = descr.lastIndexOf(' ', maxLength);
@@ -62,7 +61,7 @@ class Goods {
 	}
 
 	loadGoods() {
-		fetch('https://dzadranik.github.io/goods-and-basket/src/json/goods.json')
+		fetch(this._linkToJson)
 			.then(response => response.json())
 			.then(goods => {
 				this._addGoodsToContainer(goodsPaging.addPagingGetItemsInPage(this._sorting(goods)));
@@ -300,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 const basket = new Basket(),
-	goods = new Goods(),
+	goods = new Goods('https://dzadranik.github.io/goods-and-basket/src/json/goods.json'),
 	goodsPaging = new Paging(5, '.js-pagination');
 
 goods.loadGoods();
